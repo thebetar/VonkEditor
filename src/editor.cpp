@@ -245,6 +245,22 @@ void Editor::start_editor()
         }
     };
 
+    auto append_char = [&](char ch)
+    {
+        if (cursor_pos >= (int)strlen(content))
+        {
+            content[cursor_pos] = ch;
+            content[cursor_pos + 1] = '\0'; // Null-terminate the string
+        }
+        else
+        {
+            memmove(&content[cursor_pos + 1], &content[cursor_pos], strlen(&content[cursor_pos]) + 1);
+            content[cursor_pos] = ch;
+        }
+
+        cursor_right(); // Move cursor to the right after inserting
+    };
+
     update_screen();
 
     while (1)
@@ -282,6 +298,20 @@ void Editor::start_editor()
         else if (cur_ch == KEY_DOWN)
         {
             cursor_down();
+        }
+        else if (cur_ch == KEY_DC) // Delete key
+        {
+            if (content[cursor_pos] == '\0')
+            {
+                continue; // Nothing to delete at the end
+            }
+
+            // Shift content to the left
+            memmove(&content[cursor_pos], &content[cursor_pos + 1], strlen(&content[cursor_pos + 1]) + 1);
+        }
+        else if (isprint(cur_ch)) // Printable character
+        {
+            append_char(static_cast<char>(cur_ch));
         }
 
         update_screen();
